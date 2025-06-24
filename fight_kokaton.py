@@ -126,6 +126,7 @@ class Beam:
         cx, cy = bird.rct.center
         self.rct.centerx = cx + (bw * self.vx) // 5
         self.rct.centery = cy + (bh * self.vy) // 5
+        #このコードは「こうかとんの位置と向きに応じて、ビームを前方に出現させる」ための座標計算です。
 
     def is_off_screen(self) -> bool:
         return self.rct.left > WIDTH or self.rct.right < 0
