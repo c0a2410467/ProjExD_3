@@ -3,6 +3,7 @@ import random
 import sys
 import time
 import pygame as pg
+import math
 
 
 WIDTH = 1100  # ゲームウィンドウの幅
@@ -56,6 +57,7 @@ class Bird:
         self.img = __class__.imgs[(+5, 0)]
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
+        self.dire = (+5, 0)  # 初期方向は右向き
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -81,7 +83,8 @@ class Bird:
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
-            self.img = __class__.imgs[tuple(sum_mv)]
+            self.dire = tuple(sum_mv)
+            self.img = __class__.imgs[self.dire]
         screen.blit(self.img, self.rct)
 
 class Score:
@@ -112,11 +115,17 @@ class Beam:
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん（Birdインスタンス）
         """
-        self.img = pg.image.load("fig/beam.png")
+        self.vx, self.vy = bird.dire  # 向きを取得
+
+        angle = math.degrees(math.atan2(-self.vy, self.vx))  # 回転角度を計算
+        self.img0 = pg.image.load("fig/beam.png")
+        self.img = pg.transform.rotozoom(self.img0, angle, 1.0)
+
         self.rct = self.img.get_rect()
-        self.rct.centery = bird.rct.centery
-        self.rct.left = bird.rct.right  # ビームの左座標＝こうかとんの右座標
-        self.vx, self.vy = +5, 0
+        bw, bh = bird.rct.width, bird.rct.height
+        cx, cy = bird.rct.center
+        self.rct.centerx = cx + (bw * self.vx) // 5
+        self.rct.centery = cy + (bh * self.vy) // 5
 
     def is_off_screen(self) -> bool:
         return self.rct.left > WIDTH or self.rct.right < 0
